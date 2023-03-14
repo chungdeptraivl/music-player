@@ -1,19 +1,21 @@
 /**
  * 1. Render Songs --> OK
  * 2. Scroll top --> OK
- * 3. Play / pause / seek -->OK
+ * 3. Play / pause / seek -->  OK
  * 4. CD rotate --> OK
  * 5. Next / prev --> OK
- * 6. Random
- * 7. Next / Repeat when ended
- * 8. Active song
- * 9. Scroll active song into view
+ * 6. Random --> OK
+ * 7. Next / Repeat when ended --> OK
+ * 8. Active song --> OK
+ * 9. Scroll active song into view --> OK
  * 10. Play song when click 
  */
 
 
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
+
+const PLAYER_STORAGE_KEY = "Ơi! anh Chung đây"
 
 const cd = $('.cd-thumb')
 const heading = $('header h2')
@@ -22,15 +24,19 @@ const audio = $('#audio')
 const playBtn = $('.btn-toggle-play')
 const pausing = $('.pause')
 const playing = $('.play')
+const repeatBtn = $('.btn-repeat')
 const nextBtn = $('.btn-next')
 const prevBtn = $('.btn-prev')
 const progress = $('#progress')
 const randomBtn = $('.btn-random')
+const playlist = $('.playlist')
 
 const app = {
     currentIndex: 0,
     isPlaying: false,
     isRandom: false,
+    isRepeat: false,
+    // config: JSON.parse(localStorage.getItem(PLAYER_STORAGE_KEY)) || {},
 
     songs: [
         {
@@ -83,10 +89,15 @@ const app = {
         }
     ],
 
+    // setConfig: function(key, value) {
+    //     this.config[key] = value
+    //     localStorage.setItem(PLAYER_STORAGE_KEY, JSON.stringify(this.config))
+    // },  
+
     render: function () {
-        const htmls = this.songs.map(song => {
+        const htmls = this.songs.map((song, index) => {
             return `
-            <div class="song">
+            <div class="song ${index === this.currentIndex ? 'active' : ''}" data-index ="${index}">
                 <div class="thumb"
                     style="background-image: url('${song.image}')">
                 </div>
@@ -102,7 +113,7 @@ const app = {
              </div>
             `
         })
-        $('.playlist').innerHTML = htmls.join('')
+        playlist.innerHTML = htmls.join('')
     },
 
     defineProperties: function () {
@@ -184,21 +195,83 @@ const app = {
 
         // Chuyển bài tiếp theo
         nextBtn.onclick = function() {
-            _this.nextSong()
+            if (_this.isRandom) {
+                _this.randomSong()
+            } else {
+                _this.nextSong()
+            }
             audio.play()
+            _this.render()
+            _this.scrollToActiveSong()
         }
 
         // Quay lại bài trước đó
         prevBtn.onclick = function() {
-            _this.prevSong()
+            if (_this.isRandom) {
+                _this.randomSong()
+            } else {
+                _this.prevSong()
+            }
             audio.play()
+            _this.render()
+            _this.scrollToActiveSong()
         }
 
         // Xử lí khi click random
-        randomBtn.onclick = function() {
-            _this.randomSong()
-            audio.play()
+        randomBtn.onclick = function(e) {
+            _this.isRandom = !_this.isRandom
+            // _this.setConfig('isRandom', _this.isRandom)
+            randomBtn.classList.toggle('active', _this.isRandom)
         }
+
+        //Xử lí khi repeat lại một bài hát
+        repeatBtn.onclick = function(e) {
+            _this.isRepeat =!_this.isRepeat
+            // _this.setConfig('isRepeat', _this.isRepeat)
+            repeatBtn.classList.toggle('active', _this.isRepeat)
+        }
+
+        // Xử lý next song khi audio kết thúc
+        audio.onended = function () {
+            if (_this.isRepeat) {
+                audio.play()
+            } else {
+                if (_this.isRandom) {
+                    _this.randomSong()
+                } else {
+                    _this.nextSong()
+                }
+                audio.play()
+            }
+        }
+
+        //Lắng nghe hành vi click vào playlist
+        playlist.onclick = function (e) {
+            const songNode = e.target.closest('.song:not(.active)') 
+            const optionNode = e.target.closest('.option')
+            if (songNode || optionNode) { 
+                if (songNode) {
+                    _this.currentIndex = parseInt(songNode.getAttribute('data-index'))
+                    _this.loadCurrentSong()
+                    _this.render()
+                    _this.scrollToActiveSong()
+                    audio.play()
+                }
+
+                if (optionNode) {
+                    //nao nghĩ dc cái gì thì làm
+                }
+            }
+        }
+    },
+
+    scrollToActiveSong: function () {
+        setTimeout( () => {
+            $('.song.active').scrollIntoView({
+                behavior:'smooth',
+                block:'center'
+            })
+        }, 500)
     },
 
     loadCurrentSong: function () {
@@ -228,6 +301,8 @@ const app = {
         do {
             newIndex = Math.floor(Math.random() * this.songs.length)
         } while (newIndex === this.currentIndex)
+        this.currentIndex = newIndex
+        this.loadCurrentSong()
         
     },
 

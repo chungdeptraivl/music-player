@@ -108,13 +108,27 @@ header h4 {
     margin: auto;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 30px;
+    /* justify-content: space-between; */
+    padding: 12px 10px;
     width: 90%;
     box-shadow: 1px 1px 10px 0px rgba(128, 134, 143, 0.65);
     border-radius: 10px;
     background-color: #fff;
     margin-bottom: 20px;
+}
+
+.song:active {
+    opacity: 0.8;
+    background-color: #ebd5e1;
+}
+
+.song.active {
+    background-color: #cceaf3;
+}
+
+.song.active .title,
+.song.active .author {
+    color: #000;
 }
 
 .song .thumb {
@@ -141,13 +155,15 @@ header h4 {
 
 .song .option {
     font-size: 20px;
+    padding: 10px 20px;
     cursor: pointer;
 }
 
-.song .option  i {
-    margin-left: 20px;
-}
 
 .song .option:hover {
+    color: #d71268;
+}
+
+.active {
     color: #d71268;
 }
