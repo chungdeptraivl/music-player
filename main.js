@@ -8,14 +8,14 @@
  * 7. Next / Repeat when ended --> OK
  * 8. Active song --> OK
  * 9. Scroll active song into view --> OK
- * 10. Play song when click 
+ * 10. Play song when click --> OK
  */
 
 
 const $ = document.querySelector.bind(document)
 const $$ = document.querySelectorAll.bind(document)
 
-const PLAYER_STORAGE_KEY = "Ơi! anh Chung đây"
+// const PLAYER_STORAGE_KEY = "Ơi! anh Chung đây"
 
 const cd = $('.cd-thumb')
 const heading = $('header h2')
@@ -82,11 +82,41 @@ const app = {
             image: './assets/Images/nhu_anh_da_thay_em.jpg'
         },
         {
+            name: 'ANH KHÔNG THỀ GÌ ĐÂU ANH LÀM AKTGĐ',
+            singer: 'PHÚC DU',
+            path: './assets/Songs/y2mate.com - ANH KHÔNG THỀ GÌ ĐÂU ANH LÀM AKTGĐ  PHÚC DU OFFICIAL MUSIC VIDEO.mp3',
+            image: './assets/Images/anh_khong_the_gi_dau_anh_lam.jpg'
+        },
+        {
+            name: 'từ chối nhẹ nhàng thôi',
+            singer: 'Phúc Du ft Bích Phương',
+            path: './assets/Songs/y2mate.com - PHÚC DU feat BÍCH PHƯƠNG  từ chối nhẹ nhàng thôi Official MV.mp3',
+            image: './assets/Images/tu_choi_nhe_nhang_thoi.jpg'
+        },
+        {
+            name: 'NỤ HỒNG MONG MANH',
+            singer: 'Jombie ft Mr Sâu x prod Tam Ke',
+            path: './assets/Songs/y2mate.com - NỤ HỒNG MONG MANH  Rap Version  Jombie ft Mr Sâu x prod Tam Ke  G5R  MV.mp3',
+            image: './assets/Images/nu_hong_mong_manh.jpg'
+        },
+        {
             name: 'Don\'t coi',
             singer: 'RONBOOGZ',
             path: './assets/Songs/y2mate.com - Dont Côi  x Ronboogz Visualizer.mp3',
             image: './assets/Images/don_coi.jpg'
-        }
+        },
+        {
+            name: 'Ai là người thương em (Rap Version)',
+            singer: 'PROD TAM KÊ',
+            path: './assets/Songs/y2mate.com - Ai Là Người Thương Em  Rap Version  Spy Official Prod Tam Kê Mix.mp3',
+            image: 'assets/Images/ver_rep_ai_la_nguoi_thuong_em.jpg'
+        },
+        {
+            name: 'yêu anh đi mẹ anh bán bánh mì',
+            singer: 'PHÚC DU',
+            path: './assets/Songs/y2mate.com - PHÚC DU  yêu anh đi mẹ anh bán bánh mì MV OFFICIAL.mp3',
+            image: 'assets/Images/yeu_anh_di_me_anh_ban_ban_mi.jpg'
+        },
     ],
 
     // setConfig: function(key, value) {
@@ -194,7 +224,7 @@ const app = {
         }
 
         // Chuyển bài tiếp theo
-        nextBtn.onclick = function() {
+        const nextNewSong = nextBtn.onclick = function () {
             if (_this.isRandom) {
                 _this.randomSong()
             } else {
@@ -206,7 +236,7 @@ const app = {
         }
 
         // Quay lại bài trước đó
-        prevBtn.onclick = function() {
+        prevBtn.onclick = function () {
             if (_this.isRandom) {
                 _this.randomSong()
             } else {
@@ -218,15 +248,15 @@ const app = {
         }
 
         // Xử lí khi click random
-        randomBtn.onclick = function(e) {
+        randomBtn.onclick = function (e) {
             _this.isRandom = !_this.isRandom
             // _this.setConfig('isRandom', _this.isRandom)
             randomBtn.classList.toggle('active', _this.isRandom)
         }
 
         //Xử lí khi repeat lại một bài hát
-        repeatBtn.onclick = function(e) {
-            _this.isRepeat =!_this.isRepeat
+        repeatBtn.onclick = function (e) {
+            _this.isRepeat = !_this.isRepeat
             // _this.setConfig('isRepeat', _this.isRepeat)
             repeatBtn.classList.toggle('active', _this.isRepeat)
         }
@@ -235,6 +265,8 @@ const app = {
         audio.onended = function () {
             if (_this.isRepeat) {
                 audio.play()
+                _this.render()
+                _this.scrollToActiveSong()
             } else {
                 if (_this.isRandom) {
                     _this.randomSong()
@@ -242,14 +274,16 @@ const app = {
                     _this.nextSong()
                 }
                 audio.play()
+                _this.render()
+                _this.scrollToActiveSong()
             }
         }
 
         //Lắng nghe hành vi click vào playlist
         playlist.onclick = function (e) {
-            const songNode = e.target.closest('.song:not(.active)') 
+            const songNode = e.target.closest('.song:not(.active)')
             const optionNode = e.target.closest('.option')
-            if (songNode || optionNode) { 
+            if (songNode || optionNode) {
                 if (songNode) {
                     _this.currentIndex = parseInt(songNode.getAttribute('data-index'))
                     _this.loadCurrentSong()
@@ -266,10 +300,10 @@ const app = {
     },
 
     scrollToActiveSong: function () {
-        setTimeout( () => {
+        setTimeout(() => {
             $('.song.active').scrollIntoView({
-                behavior:'smooth',
-                block:'center'
+                behavior: 'smooth',
+                block: 'center'
             })
         }, 500)
     },
@@ -281,7 +315,7 @@ const app = {
     },
 
     nextSong: function () {
-        this.currentIndex ++
+        this.currentIndex++
         if (this.currentIndex >= this.songs.length) {
             this.currentIndex = 0
         }
@@ -289,21 +323,21 @@ const app = {
     },
 
     prevSong: function () {
-        this.currentIndex --
+        this.currentIndex--
         if (this.currentIndex < 0) {
             this.currentIndex = this.songs.length - 1
         }
         this.loadCurrentSong()
     },
 
-    randomSong: function() {
+    randomSong: function () {
         let newIndex
         do {
             newIndex = Math.floor(Math.random() * this.songs.length)
         } while (newIndex === this.currentIndex)
         this.currentIndex = newIndex
         this.loadCurrentSong()
-        
+
     },
 
     start: function () {
